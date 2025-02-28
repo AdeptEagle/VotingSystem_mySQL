@@ -1,11 +1,6 @@
 Dependencies to Download 
-use NPM install command 
+use NPM install command :
 
-
-install nodemon globally using:
 npm i -g nodemon
-
-install the ff using npm install: 
-
-Express, bcrypt, bcryptjs , cors, dotenv, joi, mysql2, orm, reflect-metadata, typeorm
-@type/bcryptjs, @type/cors, @type/express, @type/joi, @type/node, tsnode
+npm install express bcryptjs cors dotenv joi mysql2 typeorm reflect-metadata mysql2
+npm install --save-dev @types/express @types/cors @types/bcryptjs @types/joi @types/node ts-node
