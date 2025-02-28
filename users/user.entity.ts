@@ -1,28 +1,32 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-
+import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from "typeorm";
+import * as bcrypt from "bcrypt";
+import { Role } from "../_helpers/role.enum";
 @Entity()
-export class Voter {
+export class User {
     @PrimaryGeneratedColumn()
-    voterID: number;
+    id: number;
 
-    @Column()
-    name: string;
-
-    @Column({ unique: true })
+    @Column({ type: "varchar", length: 255, unique: true })
     email: string;
 
-    @Column()
-    password: string;
+    @Column({ type: "varchar", length: 255 })
+    passwordHash: string;
 
-    @Column()
-    age: number;
+    @Column({ type: "varchar", length: 50 })
+    title: string;
 
-    @Column()
-    gender: string;
+    @Column({ type: "varchar", length: 100 })
+    firstName: string;
 
-    @Column()
-    address: string;
+    @Column({ type: "varchar", length: 100 })
+    lastName: string;
 
-    @Column({ default: "Active" })
-    voterStatus: string; // Active or Inactive
+    @Column({ type: "varchar", length: 100 })
+    Department: string;
+
+    @Column({ type: "varchar", length: 100 })
+    Course: string;
+
+    @Column({ type: "enum", enum: Role, default: Role.User })
+    role: Role;
 }

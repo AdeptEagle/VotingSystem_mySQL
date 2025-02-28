@@ -1,37 +1,64 @@
-import { Repository } from "typeorm";
 import { AppDataSource } from "../_helpers/db";
-import { Voter } from "./user.entity"; 
+import { User } from "./user.entity";
+import { Repository } from "typeorm";
+import * as bcrypt from "bcryptjs";
 
 export class UserService {
-    private voterRepository: Repository<Voter>;
+    private userRepository: Repository<User>;
 
     constructor() {
-        this.voterRepository = AppDataSource.getRepository(Voter);
+        this.userRepository = AppDataSource.getRepository(User);
     }
 
-    async getAllVoters(): Promise<Voter[]> {
-        return await this.voterRepository.find();
+    async getAll() {
+        return await this.userRepository.find({
+            select: ["id", "email", "title", "firstName", "lastName", "role", "Department", "Course"], 
+        });
     }
 
-    async getVoterById(voterID: number): Promise<Voter | null> {
-        return await this.voterRepository.findOne({ where: { voterID } });
+    async getById(id: number) {
+        const user = await this.userRepository.findOneBy({ id });
+        if (!user) throw new Error("User not found");
+        return user;
     }
 
-    async createVoter(voterData: Partial<Voter>): Promise<Voter> {
-        const newVoter = this.voterRepository.create(voterData);
-        return await this.voterRepository.save(newVoter);
+    async create(params: Partial<User> & { password?: string }) {
+        if (await this.userRepository.findOneBy({ email: params.email })) {
+            throw new Error(`Email "${params.email}" is already registered`);
+        }
+
+        const user = this.userRepository.create(params);
+
+        // Handle password separately
+        if (params.password) {
+            user.passwordHash = await bcrypt.hash(params.password, 10);
+            delete (params as any).password; 
+        }
+
+        await this.userRepository.save(user);
     }
 
-    async updateVoter(voterID: number, updateData: Partial<Voter>): Promise<Voter | null> {
-        const voter = await this.voterRepository.findOne({ where: { voterID } });
-        if (!voter) return null;
+    async update(id: number, params: Partial<User> & { password?: string }) {
+        const user = await this.getById(id);
 
-        Object.assign(voter, updateData);
-        return await this.voterRepository.save(voter);
+        if (params.email && user.email !== params.email) {
+            if (await this.userRepository.findOneBy({ email: params.email })) {
+                throw new Error(`Email "${params.email}" is already taken`);
+            }
+        }
+        if (params.password) {
+            params.passwordHash = await bcrypt.hash(params.password, 10);
+            delete (params as any).password;
+        }
+
+        Object.assign(user, params);
+        await this.userRepository.save(user);
     }
 
-    async deleteVoter(voterID: number): Promise<boolean> {
-        const result = await this.voterRepository.delete(voterID);
-        return result.affected !== 0;
+    async delete(id: number) {
+        const user = await this.getById(id);
+        await this.userRepository.remove(user);
     }
 }
+
+export const userService = new UserService();

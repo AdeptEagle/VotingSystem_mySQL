@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.ts",
+    "start": "node dist/server.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +20,12 @@
   "homepage": "https://github.com/AdeptEagle/VotingSystem_mySQL#readme",
   "description": "",
   "dependencies": {
-    "express": "^4.21.2"
+    "@types/cors": "^2.8.17",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mysql2": "^3.12.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0"
   }
 }

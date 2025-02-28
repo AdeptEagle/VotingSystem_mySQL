@@ -1,23 +1,30 @@
-//require('rootpath')(); // Set root path based on the current directory
-import express from 'express';
-import cors from 'cors';
-//import errorHandler from '_middleware/error-handler'; // Adjust as necessary
+import "reflect-metadata"; // Required for TypeORM
+import express from "express";
+import cors from "cors";
+import { AppDataSource } from "./_helpers/db";
+import errorHandler from "./_middleware/error-handler";
+import usersController from "./users/user.controller";
 
 const app = express();
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
+// API routes
+app.use("/users", usersController);
 
-app.use(errorHandler); //
+// Global error handler
+app.use(errorHandler);
 
-// Example of how to include a controller
-// app.use('/path', require('./path/to/controller'));
+// Start the database and then the server
+const port = process.env.NODE_ENV === "production" ? process.env.PORT || 80 : 4000;
 
-// Set the port based on environment
-const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 4000;
-
-// Start the server
-app.listen(port, () => console.log('Server listening on port ' + port));
+AppDataSource.initialize()
+    .then(() => {
+        console.log("Database connected successfully!");
+        app.listen(port, () => console.log(`Server listening on port ${port}`));
+    })
+    .catch((error) => {
+        console.error("Database connection failed:", error);
+    });

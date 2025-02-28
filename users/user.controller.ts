@@ -1,58 +1,92 @@
-import { Request, Response, Router } from "express";
-import { UserService } from "./user.service";
+import { Router, Request, Response, NextFunction } from "express";
+import * as Joi from "joi";
+import { validateRequest } from "../_middleware/validation";
+import { UserService } from "../users/user.service";
+import { Role } from "../_helpers/role.enum";
 
-const userService = new UserService();
+
 const router = Router();
+const userService = new UserService();
 
-router.get("/voters", async (req: Request, res: Response) => {
-    try {
-        const voters = await userService.getAllVoters();
-        res.json(voters);
-    } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-router.get("/voters/:id", async (req: Request, res: Response) => {
-    try {
-        const voter = await userService.getVoterById(parseInt(req.params.id));
-        if (!voter) return res.status(404).json({ message: "Voter not found" });
-
-        res.json(voter);
-    } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-router.post("/voters", async (req: Request, res: Response) => {
-    try {
-        const newVoter = await userService.createVoter(req.body);
-        res.status(201).json(newVoter);
-    } catch (error) {
-        res.status(500).json({ error: "Failed to create voter" });
-    }
-});
-
-router.put("/voters/:id", async (req: Request, res: Response) => {
-    try {
-        const updatedVoter = await userService.updateVoter(parseInt(req.params.id), req.body);
-        if (!updatedVoter) return res.status(404).json({ message: "Voter not found" });
-
-        res.json(updatedVoter);
-    } catch (error) {
-        res.status(500).json({ error: "Failed to update voter" });
-    }
-});
-
-router.delete("/voters/:id", async (req: Request, res: Response) => {
-    try {
-        const deleted = await userService.deleteVoter(parseInt(req.params.id));
-        if (!deleted) return res.status(404).json({ message: "Voter not found" });
-
-        res.json({ message: "Voter deleted successfully" });
-    } catch (error) {
-        res.status(500).json({ error: "Failed to delete voter" });
-    }
-});
+router.get("/", getAll);
+router.get("/:id", getById);
+router.post("/", createSchema, create);
+router.put("/:id", updateSchema, update);
+router.delete("/:id", _delete);
 
 export default router;
+
+// Route functions
+async function getAll(req: Request, res: Response, next: NextFunction) {
+    try {
+        const users = await userService.getAll(); 
+        res.json(users);
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function getById(req: Request, res: Response, next: NextFunction) {
+    try {
+        const user = await userService.getById(parseInt(req.params.id)); 
+        res.json(user);
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function create(req: Request, res: Response, next: NextFunction) {
+    try {
+        await userService.create(req.body); 
+        res.json({ message: "User created" });
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function update(req: Request, res: Response, next: NextFunction) {
+    try {
+        await userService.update(parseInt(req.params.id), req.body); 
+        res.json({ message: "User updated" });
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function _delete(req: Request, res: Response, next: NextFunction) {
+    try {
+        await userService.delete(parseInt(req.params.id)); 
+        res.json({ message: "User deleted" });
+    } catch (error) {
+        next(error);
+    }
+}
+
+// Schema functions
+function createSchema(req: Request, res: Response, next: NextFunction) {
+    const schema = Joi.object({
+        title: Joi.string().required(),
+        firstName: Joi.string().required(),
+        lastName: Joi.string().required(),
+        role: Joi.string().valid(Role.Admin, Role.User, Role.Candidate).required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().min(6).required(),
+        confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
+    });
+
+    validateRequest(req, next, schema);
+}
+
+function updateSchema(req: Request, res: Response, next: NextFunction) {
+    const schema = Joi.object({
+        title: Joi.string().empty(""),
+        firstName: Joi.string().empty(""),
+        lastName: Joi.string().empty(""),
+        role: Joi.string().valid(Role.Admin, Role.User, Role.Candidate).empty(""),
+        email: Joi.string().email().empty(""),
+        password: Joi.string().min(6).empty(""),
+        confirmPassword: Joi.string().valid(Joi.ref("password")).empty(""),
+    }).with("password", "confirmPassword");
+
+    validateRequest(req, next, schema);
+}
