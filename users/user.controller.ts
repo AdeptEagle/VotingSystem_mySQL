@@ -1,5 +1,5 @@
-import { Request, Response, Router } from "typeorm";
-import { UserService } from "..//users.service";
+import { Request, Response, Router } from "express";
+import { UserService } from "./user.service";
 
 const userService = new UserService();
 const router = Router();

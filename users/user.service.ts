@@ -1,5 +1,5 @@
 import { Repository } from "typeorm";
-import { AppDataSource } from "../users.service"; 
+import { AppDataSource } from "../_helpers/db";
 import { Voter } from "./user.entity"; 
 
 export class UserService {
