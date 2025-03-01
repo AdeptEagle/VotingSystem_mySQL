@@ -21,11 +21,12 @@ export class User {
     @Column({ type: "varchar", length: 100 })
     lastName: string;
 
-    @Column({ type: "varchar", length: 100 })
+    @Column({ type: "varchar", length: 100, default: "Unknown", nullable:true })
     Department: string;
 
-    @Column({ type: "varchar", length: 100 })
+    @Column({ type: "varchar", length: 100, default: "Unknown", nullable:true })
     Course: string;
+
 
     @Column({ type: "enum", enum: Role, default: Role.User })
     role: Role;
