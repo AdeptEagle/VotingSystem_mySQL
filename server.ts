@@ -1,4 +1,5 @@
-import "reflect-metadata"; // Required for TypeORM
+import "dotenv/config";
+import "reflect-metadata"; 
 import express from "express";
 import cors from "cors";
 import { AppDataSource } from "./_helpers/db";

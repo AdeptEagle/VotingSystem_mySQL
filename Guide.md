@@ -1,6 +1,5 @@
 Dependencies to Download 
 use NPM install command :
-create db named "votesys" 
 
 
 npm i -g nodemon

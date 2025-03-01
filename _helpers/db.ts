@@ -1,6 +1,18 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
+import mysql from "mysql2/promise";
 import { User } from "../users/user.entity"; 
+
+async function ensureDatabaseExists() {
+    const connection = await mysql.createConnection({
+        host: process.env.DB_HOST || "localhost",
+        user: process.env.DB_USER || "root",
+        password: process.env.DB_PASS || "root",
+    });
+
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || "votingsys"}\``);
+    await connection.end();
+}
 
 export const AppDataSource = new DataSource({
     type: "mysql",
@@ -9,17 +21,14 @@ export const AppDataSource = new DataSource({
     username: process.env.DB_USER || "root",
     password: process.env.DB_PASS || "root",
     database: process.env.DB_NAME || "votingsys",
-    entities: [User], // Ensure your entity files are co  rrectly referenced
-    synchronize: true, // Creates tables automatically
+    entities: [User],
+    synchronize: true,
     migrations: [],
-    logging: true, // Shows queries in the console for debugging
-    extra: {
-        createDatabaseIfNotExist: true, // Automatically creates the database
-    },  
+    logging: true, 
 });
 
-AppDataSource.initialize()
-    .then(() => {
-        console.log("📌 Database Connected!");
-    })
-    .catch((error) => console.error("Database Connection Error:", error));
+ensureDatabaseExists().then(() => {
+    AppDataSource.initialize()
+        .then(() => console.log("Database Connected!"))
+        .catch((error) => console.error("Database Connection Error:", error));
+});
