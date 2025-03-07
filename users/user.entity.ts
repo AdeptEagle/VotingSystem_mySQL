@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from "typeorm";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import { Role } from "../_helpers/role.enum";
 @Entity()
 export class User {

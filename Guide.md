@@ -53,6 +53,7 @@ POST http://localhost:4000/users/
 {
   "email": "testuser@example.com",
   "password": "securepassword123",
+  "confirmPassword" : "securepassword123",
   "title": "Mr.",
   "firstName": "John",
   "lastName": "Doe",
